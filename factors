@@ -1,46 +1,57 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 
-import argparse
+import sys
 import time
+import signal
 
-def factorize(num):
-    '''Takes a number as input.
+
+class TimeoutError(Exception):
+    pass
+
+
+def signal_handler(signum, frame):
+    raise TimeoutError("Time limit exceeded")
+
+
+def factorize(num, timeout=5):
+    '''Takes a number as input and returns its factors.
     Args:
         num: input integer.
-        Return: A tuple of two factors if the number is not a prime.
-                None if the number is prime.
+        timeout: maximum time to spend on factorization, in seconds.
+    Return: A tuple of two factors if the number is not a prime.
+            None if the number is prime.
     '''
-    for i in range(2, int(num**0.5)+1):
-        if num % i == 0:
-            return (i, num//i)
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(timeout)
+    try:
+        for i in range(2, int(num**0.5)+1):
+            if num % i == 0:
+                return (i, num//i)
+    except TimeoutError:
+        return None
+    finally:
+        signal.alarm(0)
     return None
 
+
 if __name__ == "__main__":
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Factorize integers.')
-    parser.add_argument('input_file', type=str,
-                        help='path to input file')
-    args = parser.parse_args()
+    '''Reads the input file and factorizes each number.
+    '''
+    if len(sys.argv) != 2:
+        print("Usage: factors <file>")
+        exit()
+
+    input_file = sys.argv[1]
 
     try:
-        # Open input file
-        with open(args.input_file) as file:
-            lines = file.readlines()
+        with open(input_file, 'r') as f:
+            lines = f.readlines()
     except FileNotFoundError:
-        print(f"File not found: {args.input_file}")
-        exit(1)
+        print("File not found")
+        exit()
 
-    start_time = time.time()
-
-    # Loop over each line in the input file
     for line in lines:
-        # Factorize the number
         num = int(line.strip())
         factors = factorize(num)
         if factors:
             print(f"{num}={factors[0]}*{factors[1]}")
-
-        # Check if the elapsed time exceeds 5 seconds
-        if time.time() - start_time > 5:
-            print("Time limit exceeded")
-            exit(1)
