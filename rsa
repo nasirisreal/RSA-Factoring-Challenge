@@ -5,7 +5,9 @@ import random
 import time
 
 
-def is_prime(num, k=10):
+def is_prime(num, k=20):
+    '''
+    '''
     if num == 2 or num == 3:
         return True
     if num < 2 or num % 2 == 0:
@@ -50,11 +52,14 @@ if __name__ == "__main__":
 
     num = int(lines[0].strip())
 
-    for i in range(2, int(num**0.5)+1):
-        if num % i == 0 and is_prime(i) and is_prime(num//i):
+    for i in range(3, num // 2 + 1, 2):
+        if num % i == 0 and is_prime(i) and is_prime(num // i):
             print(f"{num}={i}*{num//i}")
             break
 
         if time.time() - start_time > 5:
             print("Time limit exceeded")
             exit()
+
+    else:
+        print("No factorization found")
