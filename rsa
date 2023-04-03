@@ -5,7 +5,7 @@ import random
 import time
 
 
-def is_prime(num, k=20):
+def is_prime(num, k=500):
     '''
     '''
     if num == 2 or num == 3:
